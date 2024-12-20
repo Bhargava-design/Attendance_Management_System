@@ -123,9 +123,15 @@ def generate_qrcode(request):
     # Check if there is an active QR code of the same type
     active_qrcode = QRCode.objects.filter(type=qrcode_type, is_active=True).first()
     if active_qrcode:
-        # Update the active QR code to inactive
-        active_qrcode.is_active = False
-        active_qrcode.save()
+        # Check if the active QR code is already active
+        if active_qrcode.is_active:
+            # Return the active QR code details
+            serializer = QRCodeSerializer(active_qrcode)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            # Update the active QR code to inactive
+            active_qrcode.is_active = False
+            active_qrcode.save()
 
     # Create a new QR code
     qrcode_obj = QRCode.objects.create(QRCode_id=qrcode_id, type=qrcode_type)
